@@ -1,0 +1,36 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.card {
+    background-color: #313244;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    width: 320px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 15px 0;
+    border: 2px solid #45475a;
+    border-radius: 6px;
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+    box-sizing: border-box;
+}
+
+#strength-text {
+    font-weight: bold;
+    margin-top: 10px;
+    color: #a6adc8;
+}
