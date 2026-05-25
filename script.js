@@ -47,7 +47,7 @@ passwordInput.addEventListener('input', () => {
         progressBar.style.backgroundColor = "#f9e2af"; // สีเหลือง
     }
 
-    else if (score <= 7) {
+    else if (score === 7) {
         strengthText.innerText = "ปลอดภัยระดับสูงสุด! (แฮกเกอร์ร้องไห้)";
         strengthText.style.color = "#a6e3a1"; // สีเขียว
         progressBar.style.width = "180px"; // ความกว้างของแถบความแข็งแรง
