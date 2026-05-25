@@ -1,6 +1,8 @@
 const passwordInput = document.getElementById('password');
 const strengthText = document.getElementById('strength-text');
 const progressBar = document.getElementById('progress');
+const toggleIcon = document.getElementById('toggleIcon');
+const showPasswordIcon = document.getElementById('showPasswordIcon');
 
 passwordInput.addEventListener('input', () => {
     const value = passwordInput.value;
@@ -53,4 +55,10 @@ passwordInput.addEventListener('input', () => {
         progressBar.style.width = "180px"; // ความกว้างของแถบความแข็งแรง
         progressBar.style.backgroundColor = "#a6e3a1"; // สีเขียว
     }
+});
+
+toggleIcon.addEventListener('click', () => {
+    const isHidden = passwordInput.type === 'password';
+    passwordInput.type = isHidden ? 'text' : 'password';
+    showPasswordIcon.src = isHidden ? '/images/show.png' : '/images/hidden.png'; // เปลี่ยนไอคอนตามสถานะ
 });
