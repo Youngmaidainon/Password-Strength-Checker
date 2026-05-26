@@ -61,13 +61,6 @@ cd Password-Strength-Checker
 open index.html   # or double-click the file
 ```
 
-Or serve it locally:
-
-```bash
-npx serve .
-# visit http://localhost:3000
-```
-
 > **Note:** The HaveIBeenPwned API requires a network connection. The rest of the app works fully offline.
 
 ---
@@ -128,16 +121,6 @@ evaluatePassword()  ──►  7 regex/logic checks  ──►  score (0–7)
 | Hashing | Web Crypto API (`crypto.subtle.digest`) |
 | Fonts | JetBrains Mono · Outfit (Google Fonts) |
 | Breach API | HaveIBeenPwned v3 |
-
----
-
-## 🗺️ Roadmap
-
-- [ ] Entropy score (bits) display
-- [ ] Password generator with configurable rules
-- [ ] Copy-to-clipboard button
-- [ ] English / Thai language toggle
-- [ ] Keyboard shortcut support
 
 ---
 
