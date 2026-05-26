@@ -3,6 +3,8 @@ const strengthText = document.getElementById('strength-text');
 const progressBar = document.getElementById('progress');
 const toggleIcon = document.getElementById('toggleIcon');
 const showPasswordIcon = document.getElementById('showPasswordIcon');
+const submitButton = document.getElementById('submit');
+const result = document.getElementById('result');
 
 passwordInput.addEventListener('input', () => {
     const value = passwordInput.value;
@@ -61,4 +63,105 @@ toggleIcon.addEventListener('click', () => {
     const isHidden = passwordInput.type === 'password';
     passwordInput.type = isHidden ? 'text' : 'password';
     showPasswordIcon.src = isHidden ? '/images/show.png' : '/images/hidden.png'; // เปลี่ยนไอคอนตามสถานะ
+});
+
+async function checkPassword(password) {
+
+    // password ว่าง
+    if (!password) {
+
+        result.textContent = "Please enter a password";
+        result.style.color = "orange";
+
+        return;
+    }
+
+    // loading
+    result.textContent = "Checking...";
+    result.style.color = "gray";
+
+    // string -> bytes
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+
+    // SHA1 hash
+    const hashBuffer = await crypto.subtle.digest("SHA-1", data);
+
+    // ArrayBuffer -> array
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+    // array -> hex string
+    const sha1 = hashArray
+        .map(byte => byte.toString(16).padStart(2, "0"))
+        .join("")
+        .toUpperCase();
+
+    // prefix / suffix
+    const prefix = sha1.slice(0, 5);
+    const suffix = sha1.slice(5);
+
+    try {
+
+        // fetch API
+        const res = await fetch(
+            `https://api.pwnedpasswords.com/range/${prefix}`,
+            {
+                headers: {
+                    "Add-Padding": "true"
+                }
+            }
+        );
+
+        // response text
+        const text = await res.text();
+
+        // split lines
+        const lines = text.split("\n");
+
+        // find matching hash
+        const match = lines.find(line => {
+
+            const [hash] = line.trim().split(":");
+
+            return hash === suffix;
+
+        });
+
+        // found
+        if (match) {
+
+            const count = match.split(":")[1];
+
+            result.textContent =
+                `This password was found ${count} times in data breaches`;
+
+            result.style.color = "red";
+
+        } else {
+
+            result.textContent =
+                "Good news — password not found in known breaches";
+
+            result.style.color = "green";
+
+        }
+
+    } catch (error) {
+
+        result.textContent =
+            "Error checking password";
+
+        result.style.color = "red";
+
+        console.error(error);
+
+    }
+}
+
+submitButton.addEventListener("click", async () => {
+
+    const password = passwordInput.value.trim();
+
+    await checkPassword(password);
+
 });
