@@ -1,167 +1,170 @@
 const passwordInput = document.getElementById('password');
 const strengthText = document.getElementById('strength-text');
-const progressBar = document.getElementById('progress');
 const toggleIcon = document.getElementById('toggleIcon');
-const showPasswordIcon = document.getElementById('showPasswordIcon');
+const eyeIcon = document.getElementById('eyeIcon');
+const eyeOffIcon = document.getElementById('eyeOffIcon');
 const submitButton = document.getElementById('submit');
 const result = document.getElementById('result');
+const strengthBars = document.querySelector('.strength-bars');
 
+// ── Check items map ──
+const checkMap = {
+    length: { el: document.getElementById('check-length'), label: '✓' },
+    upper: { el: document.getElementById('check-upper'), label: '✓' },
+    lower: { el: document.getElementById('check-lower'), label: '✓' },
+    number: { el: document.getElementById('check-number'), label: '✓' },
+    special: { el: document.getElementById('check-special'), label: '✓' },
+    nospace: { el: document.getElementById('check-nospace'), label: '✓' },
+    norepeat: { el: document.getElementById('check-norepeat'), label: '✓' },
+};
+
+function evaluatePassword(value) {
+    return {
+        length: value.length >= 8,
+        upper: /[A-Z]/.test(value),
+        lower: /[a-z]/.test(value),
+        number: /[0-9]/.test(value),
+        special: /[!"#$%&'()*+,\-./:;<=>?@\[\\\]^`{|}~]/.test(value),
+        nospace: !/\s/.test(value),
+        norepeat: !/(.)\1{2,}/.test(value),
+    };
+}
+
+function updateChecklist(checks) {
+    for (const key in checkMap) {
+        const { el } = checkMap[key];
+        const icon = el.querySelector('.check-icon');
+        if (checks[key]) {
+            el.classList.add('pass');
+            icon.textContent = '✓';
+        } else {
+            el.classList.remove('pass');
+            icon.textContent = '○';
+        }
+    }
+}
+
+function updateStrengthBars(score) {
+    const bars = document.querySelectorAll('.bar');
+
+    // Remove all state classes
+    strengthBars.className = 'strength-bars';
+    bars.forEach(b => b.classList.remove('active'));
+
+    if (score === 0) {
+        strengthText.textContent = 'รอการตรวจสอบ...';
+        strengthText.style.color = '';
+        return;
+    }
+
+    // ── Original 3-tier logic (score out of 7) ──
+    let stateClass, label, color, segments;
+
+    if (score <= 3) {
+        stateClass = 'bars-weak';
+        label = 'อ่อนแอเกินไป (เสี่ยงโดนแฮกได้ง่าย)';
+        color = '#f38ba8';
+        segments = 1;
+    } else if (score <= 5) {
+        stateClass = 'bars-medium';
+        label = 'ปานกลาง (ลองเพิ่มอักขระให้หลากหลาย)';
+        color = '#f9e2af';
+        segments = 3;
+    } else if (score <= 6) {
+        stateClass = 'bars-good';
+        label = 'แข็งแรง (เกือบสมบูรณ์แบบ)';
+        color = '#a6e3a1';
+        segments = 4;
+    } else if (score === 7) {
+        stateClass = 'bars-max';
+        label = 'ปลอดภัยระดับสูงสุด! (แฮกเกอร์ร้องไห้)';
+        color = '#a6e3a1';
+        segments = 5;
+    }
+
+    strengthBars.classList.add(stateClass);
+    for (let i = 0; i < segments; i++) {
+        bars[i].classList.add('active');
+    }
+    strengthText.textContent = label;
+    strengthText.style.color = color;
+}
+
+// ── Live evaluation ──
 passwordInput.addEventListener('input', () => {
     const value = passwordInput.value;
 
-    // ถ้ายังไม่ได้พิมพ์อะไร ให้กลับไปสถานะเริ่มต้น
     if (value.length === 0) {
-        strengthText.innerText = "พิมพ์รหัสผ่านเพื่อเริ่มตรวจสอบ...";
-        strengthText.style.color = "#a6adc8";
-        progressBar.style.width = "0px";
+        updateStrengthBars(0);
+        updateChecklist({ length: false, upper: false, lower: false, number: false, special: false, nospace: false, norepeat: false });
         return;
     }
 
-    // 1. สร้าง Object ตรวจสอบเงื่อนไขด้วย Regex (คืนค่าเป็น true / false)
-    const checks = {
-        length: value.length >= 8, // ความยาวอย่างน้อย 8 ตัวอักษร
-        Upper: /[A-Z]/.test(value), // มีตัวพิมพ์ใหญ่
-        Lower: /[a-z]/.test(value), // มีตัวพิมพ์เล็ก
-        Number: /[0-9]/.test(value), // มีตัวเลข
-        Special: /[!@#$%^&*(),.?":{}|<>]/.test(value), // มีอักขระพิเศษ
-        noWhitespace: !/\s/.test(value), // ไม่มีช่องว่าง
-        noRepeating: !/(.)\1{2,}/.test(value) // ไม่มีตัวอักษรซ้ำกันเกิน 2 ตัว
-    };
+    const checks = evaluatePassword(value);
+    const score = Object.values(checks).filter(Boolean).length;
 
-    // 2. นับคะแนนว่าผ่านทั้งหมดกี่ข้อ
-    let score = 0;
-    for (let key in checks) {
-        if (checks[key] === true) {
-            score++;
-        }
-    }
+    updateChecklist(checks);
+    updateStrengthBars(score);
 
-    // 3. ประเมินผลจากคะแนนที่ได้ (คะแนนเต็ม 7)
-    if (score <= 3) {
-        strengthText.innerText = "อ่อนแอเกินไป (เสี่ยงโดนแฮกได้ง่าย)";
-        strengthText.style.color = "#f38ba8"; // สีแดง
-        progressBar.style.width = "60px"; // ความกว้างของแถบความแข็งแรง
-        progressBar.style.backgroundColor = "#f38ba8"; // สีแดง
-    }
-
-    else if (score <= 5) {
-        strengthText.innerText = "ปานกลาง (ลองเพิ่มอักขระให้หลากหลาย)";
-        strengthText.style.color = "#f9e2af"; // สีเหลือง
-        progressBar.style.width = "120px"; // ความกว้างของแถบความแข็งแรง
-        progressBar.style.backgroundColor = "#f9e2af"; // สีเหลือง
-    }
-
-    else if (score === 7) {
-        strengthText.innerText = "ปลอดภัยระดับสูงสุด! (แฮกเกอร์ร้องไห้)";
-        strengthText.style.color = "#a6e3a1"; // สีเขียว
-        progressBar.style.width = "180px"; // ความกว้างของแถบความแข็งแรง
-        progressBar.style.backgroundColor = "#a6e3a1"; // สีเขียว
+    // Reset breach result when typing
+    if (!result.classList.contains('hidden')) {
+        result.classList.add('hidden');
     }
 });
 
+// ── Toggle visibility ──
 toggleIcon.addEventListener('click', () => {
     const isHidden = passwordInput.type === 'password';
     passwordInput.type = isHidden ? 'text' : 'password';
-    showPasswordIcon.src = isHidden ? '/images/show.png' : '/images/hidden.png'; // เปลี่ยนไอคอนตามสถานะ
+    eyeIcon.style.display = isHidden ? 'none' : '';
+    eyeOffIcon.style.display = isHidden ? '' : 'none';
 });
 
+// ── HaveIBeenPwned check ──
+function showResult(text, type) {
+    result.textContent = text;
+    result.className = `result-box ${type}`;
+}
+
 async function checkPassword(password) {
-
-    // password ว่าง
     if (!password) {
-
-        result.textContent = "Please enter a password";
-        result.style.color = "orange";
-
+        showResult('⚠ กรุณากรอกรหัสผ่านก่อน', 'warning');
         return;
     }
 
-    // loading
-    result.textContent = "Checking...";
-    result.style.color = "gray";
+    showResult('กำลังตรวจสอบ...', 'loading');
 
-    // string -> bytes
     const encoder = new TextEncoder();
-    const data = encoder.encode(password);
-
-    // SHA1 hash
-    const hashBuffer = await crypto.subtle.digest("SHA-1", data);
-
-    // ArrayBuffer -> array
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-
-    // array -> hex string
-    const sha1 = hashArray
-        .map(byte => byte.toString(16).padStart(2, "0"))
-        .join("")
+    const hashBuf = await crypto.subtle.digest('SHA-1', encoder.encode(password));
+    const sha1 = Array.from(new Uint8Array(hashBuf))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('')
         .toUpperCase();
 
-    // prefix / suffix
     const prefix = sha1.slice(0, 5);
     const suffix = sha1.slice(5);
 
     try {
-
-        // fetch API
-        const res = await fetch(
-            `https://api.pwnedpasswords.com/range/${prefix}`,
-            {
-                headers: {
-                    "Add-Padding": "true"
-                }
-            }
-        );
-
-        // response text
-        const text = await res.text();
-
-        // split lines
-        const lines = text.split("\n");
-
-        // find matching hash
-        const match = lines.find(line => {
-
-            const [hash] = line.trim().split(":");
-
-            return hash === suffix;
-
+        const res = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`, {
+            headers: { 'Add-Padding': 'true' }
         });
+        const text = await res.text();
+        const match = text.split('\n').find(line => line.trim().split(':')[0] === suffix);
 
-        // found
         if (match) {
-
-            const count = match.split(":")[1];
-
-            result.textContent =
-                `This password was found ${count} times in data breaches`;
-
-            result.style.color = "red";
-
+            const count = parseInt(match.split(':')[1], 10).toLocaleString();
+            showResult(`⚠ รหัสผ่านนี้ถูกพบ ${count} ครั้งในข้อมูลที่รั่วไหล — ไม่ควรใช้!`, 'danger');
         } else {
-
-            result.textContent =
-                "Good news — password not found in known breaches";
-
-            result.style.color = "green";
-
+            showResult('✓ ไม่พบรหัสผ่านนี้ในฐานข้อมูลที่รั่วไหล', 'success');
         }
-
-    } catch (error) {
-
-        result.textContent =
-            "Error checking password";
-
-        result.style.color = "red";
-
-        console.error(error);
-
+    } catch (err) {
+        showResult('✕ ไม่สามารถเชื่อมต่อได้ ลองใหม่อีกครั้ง', 'danger');
+        console.error(err);
     }
 }
 
-submitButton.addEventListener("click", async () => {
-
-    const password = passwordInput.value.trim();
-
-    await checkPassword(password);
-
+submitButton.addEventListener('click', async () => {
+    submitButton.disabled = true;
+    await checkPassword(passwordInput.value.trim());
+    submitButton.disabled = false;
 });
