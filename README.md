@@ -1,4 +1,4 @@
-# 🛡️ PasswordGuard
+# 🛡️ Password Strength Checker
 
 A client-side password strength checker with real-time feedback and HaveIBeenPwned breach detection — built with vanilla HTML, CSS, and JavaScript.
 
