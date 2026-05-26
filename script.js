@@ -115,9 +115,20 @@ passwordInput.addEventListener('input', () => {
 // ── Toggle visibility ──
 toggleIcon.addEventListener('click', () => {
     const isHidden = passwordInput.type === 'password';
+
+    // สลับประเภทของ Input
     passwordInput.type = isHidden ? 'text' : 'password';
-    eyeIcon.style.display = isHidden ? 'none' : '';
-    eyeOffIcon.style.display = isHidden ? '' : 'none';
+
+    // สลับไอคอน (ตาเปิด = เห็นรหัส, ตาปิด = ซ่อนรหัส)
+    eyeIcon.style.display = isHidden ? '' : 'none';
+    eyeOffIcon.style.display = isHidden ? 'none' : '';
+
+    // คืน Focus กลับไปที่ Input
+    passwordInput.focus();
+
+    // เลื่อน Cursor ไปท้ายสุดของข้อความ (แก้ปัญหา Cursor กระโดดในบางเบราว์เซอร์)
+    const len = passwordInput.value.length;
+    passwordInput.setSelectionRange(len, len);
 });
 
 // ── HaveIBeenPwned check ──
