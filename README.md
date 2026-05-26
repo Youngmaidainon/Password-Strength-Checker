@@ -75,7 +75,7 @@ npx serve .
 ## 📁 Project Structure
 
 ```
-password-guard/
+Password-Strength-Checker/
 ├── index.html   # Markup and layout (Thai-language UI)
 ├── style.css    # Dark theme, strength bar states, animations
 └── script.js    # Password evaluation, HIBP API call, DOM updates
