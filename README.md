@@ -126,4 +126,4 @@ evaluatePassword()  ──►  7 regex/logic checks  ──►  score (0–7)
 
 ## 📄 License
 
-MIT — free to use, modify, and distribute.
+[MIT License](LICENSE) — free to use, modify, and distribute.
